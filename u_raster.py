@@ -134,8 +134,10 @@ if __name__ == '__main__':
 
     #x, y->3857
     col, row   = int(cols/2), int(rows/2)
+    # 13056 10624
     print('row col in image = ', row, col)
     xy_3857 = fn_transform_image_3857(row, col)
+    # 12933995.547791336, 4843814.482431561
     print('x y in 3857 =', xy_3857)
     #x 在前
     lat,lon, z = transform_3857_4326.TransformPoint(*xy_3857)
