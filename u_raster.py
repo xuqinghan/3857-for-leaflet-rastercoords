@@ -71,7 +71,7 @@ def transform_point(transform, point):
 
 def createProj2ImageRowCol(transform):
 
-    def lonlat2RowCol(lon, lat):
+    def lonlat2xy(lon, lat):
         dTemp = transform[1]*transform[5] - transform[2]*transform[4];
 
         dCol = (transform[5]*(lon - transform[0]) - 
@@ -79,9 +79,12 @@ def createProj2ImageRowCol(transform):
         dRow = (transform[1]*(lat - transform[3]) - 
             transform[4]*(lon - transform[0])) / dTemp + 0.5;
 
-        return int(dCol), int(dRow)
+        return int(dRow), int(dCol)
 
-    return latlon2RowCol
+    return lonlat2xy
+
+
+
 
 def createImageRowCol2LonLat(transform):
 
@@ -112,19 +115,21 @@ if __name__ == '__main__':
     transform_para_image_3857 = dataset.GetGeoTransform()
     print(transform_para_image_3857)
     #print(transform_image_3857)
-    transform_image_3857 = createImageRowCol2LonLat(transform_para_image_3857)
-    transform_3857_image = createImageRowCol2LonLat(transform_para_image_3857)
+    fn_transform_image_3857 = createImageRowCol2LonLat(transform_para_image_3857)
+    fn_transform_3857_image = createProj2ImageRowCol(transform_para_image_3857)
 
     #x, y->3857
-    x, y = int(rows/2), int(rows/2)
+    x, y = int(cols/2), int(rows/2)
     print(x, y)
-    row_col_3857 = fn_RowCol2LonLat(x, y)
+    row_col_3857 = fn_transform_image_3857(x, y)
     print('row_col_3857 ', row_col_3857)
     lat,lon, z = transform_3857_4326.TransformPoint(*row_col_3857)
     # 39.847557957355505 116.18968963622903
     print(lat,lon)
     # 4326->3857
     transform_4326_3857 = get_transform_by_epsg(4326, epsg_src)
-    row_col_3857 = transform_4326_3857.TransformPoint(lat,lon)
+    row_3857,col_3857, _ = transform_4326_3857.TransformPoint(lat,lon)
     print('row_col_3857 ', row_col_3857)
-    #3857 ->x y
+    #3857 ->x y   
+    x, y = fn_transform_3857_image(row_3857, col_3857)
+    print(x, y)
